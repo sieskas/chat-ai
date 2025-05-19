@@ -15,7 +15,7 @@ export const ChatWindow = ({ messages }) => {
                 <div className="space-y-6 max-w-3xl mx-auto">
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex flex-col ${msg.role === 'assistant' ? 'items-start' : 'items-end'}`}>
-                            {/* Label qui indique "You" ou "AI Assistant" */}
+                            {/* Label that shows "You" or "AI Assistant" */}
                             <div className="text-xs font-medium text-gray-500 mb-1 px-1">
                                 {msg.role === 'assistant' ? 'AI Assistant' : 'You'}
                             </div>
@@ -28,7 +28,7 @@ export const ChatWindow = ({ messages }) => {
                                 <div className="whitespace-pre-wrap">{msg.content}</div>
                             </div>
 
-                            {/* Timestamp en bas du message */}
+                            {/* Timestamp at the bottom of the message */}
                             <div className="text-xs text-gray-400 mt-1 px-1">
                                 {msg.timestamp || new Date().toLocaleString()}
                             </div>

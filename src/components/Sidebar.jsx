@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 
 export const Sidebar = ({ conversations, selectConversation, newConversation, renameConversation, activeConversationId, model, setModel }) => {
@@ -36,9 +35,11 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
         }
     };
 
+    // Secure conversations to avoid errors
+    const safeConversations = conversations?.filter(c => c) || [];
+
     return (
         <aside className="w-64 bg-gray-50 h-screen flex flex-col border-r border-gray-100">
-            {/* Zone de création de nouveau chat */}
             <div className="p-3">
                 {isCreatingNew ? (
                     <div className="flex mb-3 relative">
@@ -74,7 +75,6 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                 )}
             </div>
 
-            {/* Zone de recherche */}
             <div className="px-3 mb-3">
                 <input
                     type="text"
@@ -85,12 +85,15 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                 />
             </div>
 
-            {/* Liste des conversations */}
             <div className="flex-1 overflow-auto">
                 <div className="px-3 py-1 text-xs font-medium text-gray-500">CHATS</div>
                 <ul>
-                    {conversations
-                        .filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+                    {safeConversations
+                        .filter(c => {
+                            // Check that c.title exists and is a string
+                            const title = c.title || '';
+                            return title.toLowerCase().includes((search || '').toLowerCase());
+                        })
                         .map(conv => (
                             <li key={conv.id} className="px-3 py-1">
                                 {editingId === conv.id ? (
@@ -127,11 +130,11 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                                             }`}
                                             onClick={() => selectConversation(conv.id)}
                                         >
-                                            {conv.title}
+                                            {conv.title || 'Untitled Chat'}
                                         </button>
                                         <button
                                             className="p-1 text-gray-400 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={() => handleStartRename(conv.id, conv.title)}
+                                            onClick={() => handleStartRename(conv.id, conv.title || '')}
                                             title="Rename"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -145,7 +148,6 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                 </ul>
             </div>
 
-            {/* Menu de sélection du modèle */}
             <div className="border-t border-gray-100 p-3">
                 <div className="relative">
                     <button
@@ -166,33 +168,18 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                     {isModelDropdownOpen && (
                         <div className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-md shadow-lg z-10">
                             <div className="py-1">
-                                <button
-                                    className={`block w-full px-4 py-2 text-left text-sm ${model === 'gpt-4o' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                                    onClick={() => {
-                                        setModel('gpt-4o');
-                                        setIsModelDropdownOpen(false);
-                                    }}
-                                >
-                                    gpt-4o
-                                </button>
-                                <button
-                                    className={`block w-full px-4 py-2 text-left text-sm ${model === 'gpt-4' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                                    onClick={() => {
-                                        setModel('gpt-4');
-                                        setIsModelDropdownOpen(false);
-                                    }}
-                                >
-                                    gpt-4
-                                </button>
-                                <button
-                                    className={`block w-full px-4 py-2 text-left text-sm ${model === 'gpt-3.5-turbo' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                                    onClick={() => {
-                                        setModel('gpt-3.5-turbo');
-                                        setIsModelDropdownOpen(false);
-                                    }}
-                                >
-                                    gpt-3.5-turbo
-                                </button>
+                                {['gpt-4o', 'gpt-4', 'gpt-3.5-turbo'].map((m) => (
+                                    <button
+                                        key={m}
+                                        className={`block w-full px-4 py-2 text-left text-sm ${model === m ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                                        onClick={() => {
+                                            setModel(m);
+                                            setIsModelDropdownOpen(false);
+                                        }}
+                                    >
+                                        {m}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     )}
