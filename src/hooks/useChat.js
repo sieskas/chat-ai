@@ -122,12 +122,10 @@ export function useChat() {
         try {
             await deleteConversationApi(id);
 
-            // Mise à jour de l'état local
             setConversations(prevConversations =>
                 prevConversations.filter(c => c.id !== id)
             );
 
-            // Si la conversation supprimée est sélectionnée, effacer la sélection
             if (selectedConversation && selectedConversation.id === id) {
                 setSelectedConversation(null);
                 setMessages([]);
