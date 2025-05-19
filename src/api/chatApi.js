@@ -60,6 +60,31 @@ export async function sendMessageToServer({ content, role, timestamp, conversati
     }
 }
 
+export async function updateConversationTitle(conversationId, newTitle) {
+    try {
+        const payload = {
+            title: newTitle
+        };
+
+        const response = await fetch(`http://localhost:8080/api/chat/conversations/${conversationId}/title`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error updating conversation title: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`Error updating title for conversationId=${conversationId}:`, error);
+        throw error;
+    }
+}
+
 export async function deleteConversation(conversationId) {
     try {
         const response = await fetch(`http://localhost:8080/api/chat/conversations/${conversationId}`, {

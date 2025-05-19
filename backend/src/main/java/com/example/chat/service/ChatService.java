@@ -6,6 +6,8 @@ import com.example.chat.repository.ConversationRepository;
 import com.example.chat.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
@@ -50,10 +52,12 @@ public class ChatService {
         return aiMessage;
     }
 
+    @Transactional(readOnly = true)
     public List<Conversation> getAllConversations() {
         return conversationRepo.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Message> getMessagesByConversation(Long conversationId) {
         return messageRepo.findByConversationId(conversationId);
     }
@@ -62,4 +66,14 @@ public class ChatService {
     public void deleteConversation(Long id) {
         conversationRepo.deleteById(id);
     }
+
+    @Transactional
+    public Conversation updateConversationTitle(Long id, String newTitle) {
+        Conversation conversation = conversationRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Conversation not found with id: " + id));
+
+        conversation.setTitle(newTitle);
+        return conversationRepo.save(conversation);
+    }
+
 }

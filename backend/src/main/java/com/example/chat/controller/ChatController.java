@@ -1,9 +1,6 @@
 package com.example.chat.controller;
 
-import com.example.chat.dto.ConversationDTO;
-import com.example.chat.dto.MessageDTO;
-import com.example.chat.dto.MessageRequest;
-import com.example.chat.dto.MessageResponse;
+import com.example.chat.dto.*;
 import com.example.chat.entity.Conversation;
 import com.example.chat.entity.Message;
 import com.example.chat.service.ChatService;
@@ -72,6 +69,21 @@ public class ChatController {
                                 msg.getConversation().getId()))
                         .collect(Collectors.toList())
         );
+    }
+
+    @PutMapping("/conversations/{id}/title")
+    public ResponseEntity<ConversationDTO> updateConversationTitle(
+            @PathVariable Long id,
+            @RequestBody TitleUpdateRequest request) {
+
+        Conversation updatedConversation = chatService.updateConversationTitle(id, request.getTitle());
+
+        ConversationDTO responseDTO = new ConversationDTO(
+                updatedConversation.getId(),
+                updatedConversation.getTitle()
+        );
+
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/conversations/{id}")

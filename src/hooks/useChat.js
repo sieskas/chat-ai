@@ -3,7 +3,7 @@ import {
     fetchConversations,
     fetchMessagesByConversation,
     sendMessageToServer,
-    deleteConversation as deleteConversationApi,
+    deleteConversation as deleteConversationApi, updateConversationTitle,
 } from "../api/chatApi";
 
 export function useChat() {
@@ -110,12 +110,47 @@ export function useChat() {
         setMessages([]);
     };
 
-    const renameConversation = (id, newTitle) => {
-        setConversations(prev =>
-            prev.map(c =>
-                c.id === id ? {...c, title: newTitle.trim() || "Untitled"} : c
-            )
-        );
+    const renameConversation = async (id, newTitle) => {
+        // Ne pas appeler l'API pour les conversations temporaires
+        if (id.toString().startsWith("temp")) {
+            setConversations(prev =>
+                prev.map(c =>
+                    c.id === id ? {...c, title: newTitle.trim() || "Untitled"} : c
+                )
+            );
+            return;
+        }
+
+        try {
+            // Optimistic UI update
+            setConversations(prev =>
+                prev.map(c =>
+                    c.id === id ? {...c, title: newTitle.trim() || "Untitled"} : c
+                )
+            );
+
+            // Update selectedConversation if it's the one being renamed
+            if (selectedConversation && selectedConversation.id === id) {
+                setSelectedConversation(prev => ({
+                    ...prev,
+                    title: newTitle.trim() || "Untitled"
+                }));
+            }
+
+            // Send request to backend
+            await updateConversationTitle(id, newTitle.trim() || "Untitled");
+
+            // Refresh conversations list to ensure consistency
+            const updatedConversations = await fetchConversations();
+            setConversations(updatedConversations);
+
+        } catch (error) {
+            console.error(`Error renaming conversation ${id}:`, error);
+            // Restore previous state if there was an error
+            const updatedConversations = await fetchConversations();
+            setConversations(updatedConversations);
+            throw error;
+        }
     };
 
     const deleteConversation = async (id) => {
