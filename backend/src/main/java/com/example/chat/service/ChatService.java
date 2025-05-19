@@ -4,6 +4,7 @@ import com.example.chat.entity.Conversation;
 import com.example.chat.entity.Message;
 import com.example.chat.repository.ConversationRepository;
 import com.example.chat.repository.MessageRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class ChatService {
     @Autowired
     private MessageRepository messageRepo;
 
+    @Transactional
     public Message handleChat(Conversation conversation, Message userMessage) {
         if (userMessage == null) {
             throw new IllegalArgumentException("Message cannot be null");
@@ -55,4 +57,8 @@ public class ChatService {
         return messageRepo.findByConversationId(conversationId);
     }
 
+    @Transactional
+    public void deleteConversation(Long id) {
+        conversationRepo.deleteById(id);
+    }
 }

@@ -13,6 +13,7 @@ function App() {
         send,
         newConversation,
         renameConversation,
+        deleteConversation,
         isLoading
     } = useChat();
 
@@ -39,6 +40,7 @@ function App() {
                 selectConversation={selectConversation}
                 newConversation={newConversation}
                 renameConversation={renameConversation}
+                deleteConversation={deleteConversation} // Ajoutez cette ligne
                 activeConversationId={selectedConversation?.id}
                 model={model}
                 setModel={setModel}

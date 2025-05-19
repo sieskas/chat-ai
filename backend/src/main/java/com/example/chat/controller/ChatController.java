@@ -73,4 +73,10 @@ public class ChatController {
                         .collect(Collectors.toList())
         );
     }
+
+    @DeleteMapping("/conversations/{id}")
+    public ResponseEntity<Void> deleteConversation(@PathVariable Long id) {
+        chatService.deleteConversation(id);
+        return ResponseEntity.noContent().build();
+    }
 }
