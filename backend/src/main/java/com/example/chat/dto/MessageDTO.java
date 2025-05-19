@@ -1,17 +1,18 @@
 package com.example.chat.dto;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class MessageDTO {
     private Long id;
     private String role;
     private String content;
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
     private Long conversationId;
 
     public MessageDTO() {}
 
-    public MessageDTO(Long id, String role, String content, LocalDateTime timestamp, Long conversationId) {
+    public MessageDTO(Long id, String role, String content, OffsetDateTime timestamp, Long conversationId) {
         this.id = id;
         this.role = role;
         this.content = content;
@@ -43,11 +44,11 @@ public class MessageDTO {
         this.content = content;
     }
 
-    public LocalDateTime getTimestamp() {
+    public OffsetDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(OffsetDateTime timestamp) {
         this.timestamp = timestamp;
     }
 

@@ -59,3 +59,20 @@ export async function sendMessageToServer({ content, role, timestamp, conversati
         throw error;
     }
 }
+
+export async function deleteConversation(conversationId) {
+    try {
+        const response = await fetch(`http://localhost:8080/api/chat/conversations/${conversationId}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error deleting conversation: ${response.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error(`Error deleting conversation ${conversationId}:`, error);
+        throw error;
+    }
+}

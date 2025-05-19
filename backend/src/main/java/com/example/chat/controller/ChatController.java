@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,9 +36,7 @@ public class ChatController {
         Message userMessage = new Message();
         userMessage.setRole(request.getRole());
         userMessage.setContent(request.getContent());
-
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-        LocalDateTime timestamp = LocalDateTime.parse(request.getTimestamp(), formatter);
+        OffsetDateTime timestamp = OffsetDateTime.parse(request.getTimestamp());
         userMessage.setTimestamp(timestamp);
 
         Message aiMessage = chatService.handleChat(conversation, userMessage);

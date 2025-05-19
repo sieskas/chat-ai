@@ -1,12 +1,22 @@
 import React, { useState, useRef } from 'react';
 
-export const Sidebar = ({ conversations, selectConversation, newConversation, renameConversation, activeConversationId, model, setModel }) => {
+export const Sidebar = ({
+                            conversations,
+                            selectConversation,
+                            newConversation,
+                            renameConversation,
+                            deleteConversation,
+                            activeConversationId,
+                            model,
+                            setModel
+                        }) => {
     const [search, setSearch] = useState('');
     const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editingTitle, setEditingTitle] = useState('');
     const [newChatTitle, setNewChatTitle] = useState('');
     const [isCreatingNew, setIsCreatingNew] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const inputRef = useRef(null);
 
     const handleNewChat = () => {
@@ -33,6 +43,22 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
             setEditingId(null);
             setEditingTitle('');
         }
+    };
+
+    const handleConfirmDelete = (id, e) => {
+        e.stopPropagation();
+        setConfirmDeleteId(id);
+    };
+
+    const handleDeleteCancel = (e) => {
+        e.stopPropagation();
+        setConfirmDeleteId(null);
+    };
+
+    const handleDeleteConfirm = (id, e) => {
+        e.stopPropagation();
+        deleteConversation(id);
+        setConfirmDeleteId(null);
     };
 
     // Secure conversations to avoid errors
@@ -122,6 +148,22 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                                             </svg>
                                         </button>
                                     </div>
+                                ) : confirmDeleteId === conv.id ? (
+                                    <div className="flex items-center bg-gray-100 p-2 rounded-md">
+                                        <span className="text-xs text-gray-700 mr-2">Delete ?</span>
+                                        <button
+                                            onClick={(e) => handleDeleteConfirm(conv.id, e)}
+                                            className="text-xs bg-red-500 text-white px-2 py-1 rounded-md mr-1 hover:bg-red-600"
+                                        >
+                                            Yes
+                                        </button>
+                                        <button
+                                            onClick={handleDeleteCancel}
+                                            className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-400"
+                                        >
+                                            No
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="flex items-center group">
                                         <button
@@ -132,15 +174,26 @@ export const Sidebar = ({ conversations, selectConversation, newConversation, re
                                         >
                                             {conv.title || 'Untitled Chat'}
                                         </button>
-                                        <button
-                                            className="p-1 text-gray-400 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={() => handleStartRename(conv.id, conv.title || '')}
-                                            title="Rename"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
+                                        <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                className="p-1 text-gray-400 hover:text-gray-700"
+                                                onClick={() => handleStartRename(conv.id, conv.title || '')}
+                                                title="Rename"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                className="p-1 text-gray-400 hover:text-red-500"
+                                                onClick={(e) => handleConfirmDelete(conv.id, e)}
+                                                title="Delete"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </li>

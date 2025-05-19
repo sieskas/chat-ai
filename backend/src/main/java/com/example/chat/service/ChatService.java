@@ -4,11 +4,14 @@ import com.example.chat.entity.Conversation;
 import com.example.chat.entity.Message;
 import com.example.chat.repository.ConversationRepository;
 import com.example.chat.repository.MessageRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -43,7 +46,7 @@ public class ChatService {
         Message aiMessage = new Message();
         aiMessage.setRole("assistant");
         aiMessage.setContent("Automatically generated response for: " + userMessage.getContent());
-        aiMessage.setTimestamp(LocalDateTime.now());
+        aiMessage.setTimestamp(OffsetDateTime.now(ZoneOffset.UTC));
         aiMessage.setConversation(conversation);
         messageRepo.save(aiMessage);
         return aiMessage;

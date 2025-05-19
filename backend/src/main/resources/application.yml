@@ -4,6 +4,7 @@ spring:
     url: jdbc:sqlite:data/chat.db
     username: sa
     password: sa
+    hikari.maximum-pool-size: 5
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:

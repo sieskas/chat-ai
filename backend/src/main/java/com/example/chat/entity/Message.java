@@ -2,6 +2,7 @@ package com.example.chat.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 public class Message {
@@ -11,14 +12,14 @@ public class Message {
 
     private String role;
     private String content;
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
 
     @ManyToOne
     private Conversation conversation;
 
     public Message() {}
 
-    public Message(String role, String content, LocalDateTime timestamp, Conversation conversation) {
+    public Message(String role, String content, OffsetDateTime timestamp, Conversation conversation) {
         this.role = role;
         this.content = content;
         this.timestamp = timestamp;
@@ -49,11 +50,11 @@ public class Message {
         this.content = content;
     }
 
-    public LocalDateTime getTimestamp() {
+    public OffsetDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(OffsetDateTime timestamp) {
         this.timestamp = timestamp;
     }
 

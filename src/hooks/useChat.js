@@ -3,6 +3,7 @@ import {
     fetchConversations,
     fetchMessagesByConversation,
     sendMessageToServer,
+    deleteConversation as deleteConversationApi,
 } from "../api/chatApi";
 
 export function useChat() {
@@ -117,6 +118,28 @@ export function useChat() {
         );
     };
 
+    const deleteConversation = async (id) => {
+        try {
+            await deleteConversationApi(id);
+
+            // Mise à jour de l'état local
+            setConversations(prevConversations =>
+                prevConversations.filter(c => c.id !== id)
+            );
+
+            // Si la conversation supprimée est sélectionnée, effacer la sélection
+            if (selectedConversation && selectedConversation.id === id) {
+                setSelectedConversation(null);
+                setMessages([]);
+            }
+
+            return true;
+        } catch (error) {
+            console.error(`Error in useChat.deleteConversation:`, error);
+            throw error;
+        }
+    };
+
     return {
         conversations,
         selectedConversation,
@@ -126,6 +149,7 @@ export function useChat() {
         send,
         newConversation,
         renameConversation,
+        deleteConversation,
         isLoading,
     };
 }

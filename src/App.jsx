@@ -40,7 +40,7 @@ function App() {
                 selectConversation={selectConversation}
                 newConversation={newConversation}
                 renameConversation={renameConversation}
-                deleteConversation={deleteConversation} // Ajoutez cette ligne
+                deleteConversation={deleteConversation}
                 activeConversationId={selectedConversation?.id}
                 model={model}
                 setModel={setModel}
