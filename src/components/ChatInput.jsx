@@ -4,11 +4,17 @@ export const ChatInput = ({ sendMessage, isLoading, temperature, setTemperature 
     const [message, setMessage] = useState('');
     const [showTemperature, setShowTemperature] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (message.trim()) {
+    const handleSend = () => {
+        if (message.trim() && !isLoading) {
             sendMessage(message);
             setMessage('');
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
         }
     };
 
@@ -31,7 +37,7 @@ export const ChatInput = ({ sendMessage, isLoading, temperature, setTemperature 
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="relative">
+            <div className="relative">
                 <div className="border border-gray-300 rounded-lg p-1 flex shadow-sm">
                     <input
                         type="text"
@@ -39,6 +45,7 @@ export const ChatInput = ({ sendMessage, isLoading, temperature, setTemperature 
                         className="flex-1 px-3 py-2 outline-none text-gray-700 rounded-lg"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         disabled={isLoading}
                     />
                     <div className="flex items-center">
@@ -52,13 +59,14 @@ export const ChatInput = ({ sendMessage, isLoading, temperature, setTemperature 
                             </svg>
                         </button>
                         <button
-                            type="submit"
+                            type="button"
                             className={`p-2 rounded-md ${
                                 isLoading || !message.trim()
                                     ? 'text-gray-400'
                                     : 'text-gray-700 hover:bg-gray-100'
                             }`}
                             disabled={isLoading || !message.trim()}
+                            onClick={handleSend}
                         >
                             {isLoading ? (
                                 <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -76,7 +84,7 @@ export const ChatInput = ({ sendMessage, isLoading, temperature, setTemperature 
                 <div className="text-xs text-gray-500 mt-1 text-center">
                     ChatAI can make mistakes. Consider checking important information.
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

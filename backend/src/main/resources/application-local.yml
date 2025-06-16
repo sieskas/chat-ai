@@ -1,0 +1,5 @@
+openai:
+  model:
+    name: gpt-4o
+  api:
+    key: ${OPENAI_API_KEY}

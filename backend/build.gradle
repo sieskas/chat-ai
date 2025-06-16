@@ -15,10 +15,20 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+    implementation 'dev.langchain4j:langchain4j:1.0.1'
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.0.1'
+
+    implementation 'com.azure:azure-core:1.55.4'
     runtimeOnly 'org.xerial:sqlite-jdbc:3.43.0.0'
     implementation 'org.hibernate.orm:hibernate-community-dialects'
     implementation 'org.flywaydb:flyway-core'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {

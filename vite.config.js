@@ -8,4 +8,16 @@ export default defineConfig({
       react(),
     tailwindcss(),
   ],
+    server: {
+        watch: {
+            // Ignorer les fichiers de base de données SQLite
+            ignored: [
+                '**/backend/**',
+                '**/*.db',
+                '**/*.db-*',
+                '**/*.sqlite',
+                '**/*.sqlite-*'
+            ]
+        }
+    }
 })

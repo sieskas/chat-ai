@@ -6,8 +6,6 @@ import com.example.chat.repository.ConversationRepository;
 import com.example.chat.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
@@ -23,32 +21,54 @@ public class ChatService {
     @Autowired
     private MessageRepository messageRepo;
 
+    @Autowired
+    private OpenAIService openAIService;
+
     @Transactional
     public Message handleChat(Conversation conversation, Message userMessage) {
         if (userMessage == null) {
             throw new IllegalArgumentException("Message cannot be null");
         }
 
+        // Handle conversation
         if (conversation == null) {
             conversation = new Conversation();
-            conversation.setTitle(conversation.getTitle());
-            conversation = conversationRepo.save(conversation);
-        } else if (conversation.getId() != null) {
+            conversation.setTitle("New conversation");
+        }
+
+        if (conversation.getId() != null) {
+            // Existing conversation
             conversation = conversationRepo.findById(conversation.getId())
-                    .orElseThrow(() -> new RuntimeException("Conversation not found: "));
+                    .orElseThrow(() -> new RuntimeException("Conversation not found"));
         } else {
+            // New conversation
+            if (conversation.getTitle() == null || conversation.getTitle().trim().isEmpty()) {
+                conversation.setTitle("New conversation");
+            }
             conversation = conversationRepo.save(conversation);
         }
 
+        // Save user message
         userMessage.setConversation(conversation);
         messageRepo.save(userMessage);
 
+        // Generate AI response
         Message aiMessage = new Message();
+        try {
+            // Call ChatGPT via OpenAI
+            String aiResponse = openAIService.generateChatResponse(userMessage.getContent());
+            aiMessage.setContent(aiResponse);
+        } catch (Exception e) {
+            // Fallback response in case of OpenAI error
+            System.err.println("Error calling OpenAI: " + e.getMessage());
+            aiMessage.setContent("I'm sorry, something went wrong. Could you please rephrase your question?");
+        }
+
         aiMessage.setRole("assistant");
-        aiMessage.setContent("Automatically generated response for: " + userMessage.getContent());
         aiMessage.setTimestamp(OffsetDateTime.now(ZoneOffset.UTC));
         aiMessage.setConversation(conversation);
         messageRepo.save(aiMessage);
+
         return aiMessage;
     }
 
@@ -75,5 +95,4 @@ public class ChatService {
         conversation.setTitle(newTitle);
         return conversationRepo.save(conversation);
     }
-
 }

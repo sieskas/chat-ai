@@ -30,6 +30,12 @@ spring:
     baseline-on-migrate: true
     out-of-order: true
 
+openai:
+  model:
+    name: todo
+  api:
+    key: todo
+
 logging:
   level:
     org.hibernate.SQL: INFO

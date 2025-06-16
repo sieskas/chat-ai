@@ -13,6 +13,8 @@ public class Message {
     private String role;
     private String content;
     private OffsetDateTime timestamp;
+    private String model;
+    private String temperature;
 
     @ManyToOne
     private Conversation conversation;
@@ -64,5 +66,21 @@ public class Message {
 
     public void setConversation(Conversation conversation) {
         this.conversation = conversation;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
     }
 }

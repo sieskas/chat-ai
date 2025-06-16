@@ -3,7 +3,8 @@ import {
     fetchConversations,
     fetchMessagesByConversation,
     sendMessageToServer,
-    deleteConversation as deleteConversationApi, updateConversationTitle,
+    deleteConversation as deleteConversationApi,
+    updateConversationTitle,
 } from "../api/chatApi";
 
 export function useChat() {
@@ -12,6 +13,7 @@ export function useChat() {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Charger les conversations au démarrage
     useEffect(() => {
         fetchConversations()
             .then(setConversations)
@@ -20,17 +22,18 @@ export function useChat() {
             });
     }, []);
 
+    // Charger les messages quand la conversation sélectionnée change
     useEffect(() => {
-        if (selectedConversation && selectedConversation.id !== undefined) {
+        if (selectedConversation && selectedConversation.id !== undefined && !selectedConversation.id.toString().startsWith("temp")) {
             fetchMessagesByConversation(selectedConversation.id)
                 .then(setMessages)
                 .catch(err => {
                     console.error(`Error loading messages for conversation ${selectedConversation.id}:`, err);
                 });
-        } else {
+        } else if (!selectedConversation || !selectedConversation.id.toString().startsWith("temp")) {
             setMessages([]);
         }
-    }, [selectedConversation]);
+    }, [selectedConversation?.id]);
 
     const selectConversation = (id) => {
         const conversation = conversations.find(c => c.id === id);
@@ -56,41 +59,46 @@ export function useChat() {
         };
 
         try {
+            // Ajouter le message utilisateur immédiatement
             setMessages(prev => [...prev, { ...userMessage, fromClient: true }]);
 
+            // Envoyer au serveur
             const response = await sendMessageToServer(userMessage);
 
+            // Mettre à jour les messages
+            setMessages(prev => {
+                const filtered = prev.filter(m => !m.fromClient);
+                const finalUserMessage = {
+                    ...userMessage,
+                    conversationId: response.conversationId || userMessage.conversationId,
+                };
+                return [...filtered, finalUserMessage, response];
+            });
+
+            // Si c'est une nouvelle conversation ou une conversation temporaire qui devient permanente
             if (response.conversationId &&
-                (!selectedConversation || selectedConversation.id !== response.conversationId)) {
+                (!selectedConversation || selectedConversation.id !== response.conversationId || isTempId)) {
 
-                const all = await fetchConversations();
-                setConversations(all);
+                // Récupérer toutes les conversations mises à jour
+                const allConversations = await fetchConversations();
+                setConversations(allConversations);
 
-                const newConv = all.find(c => c.id === response.conversationId);
-                if (newConv) {
-                    setSelectedConversation(newConv);
+                // Trouver et sélectionner la nouvelle conversation
+                const newConversation = allConversations.find(c => c.id === response.conversationId);
+                if (newConversation) {
+                    setSelectedConversation(newConversation);
                 } else {
+                    // Fallback: créer un objet conversation temporaire
                     setSelectedConversation({
                         id: response.conversationId,
-                        title: "New conversation",
+                        title: title || "New conversation",
                     });
                 }
             }
 
-            setMessages(prev => {
-                const filtered = prev.filter(m => !m.fromClient);
-
-                const userMsg = {
-                    ...userMessage,
-                    conversationId: response.conversationId || userMessage.conversationId
-                };
-
-                // Return updated list
-                return [...filtered, userMsg, response];
-            });
-
         } catch (err) {
             console.error("Error in useChat.send:", err);
+            // En cas d'erreur, supprimer le message temporaire
             setMessages(prev => prev.filter(m => !m.fromClient));
             throw err;
         } finally {
@@ -103,7 +111,7 @@ export function useChat() {
         const newConv = {
             id: tempId,
             title: title || "New chat",
-            isTemp: true // Mark as temporary
+            isTemp: true
         };
         setConversations([newConv, ...conversations]);
         setSelectedConversation(newConv);
@@ -111,42 +119,30 @@ export function useChat() {
     };
 
     const renameConversation = async (id, newTitle) => {
-        // Ne pas appeler l'API pour les conversations temporaires
+        const trimmedTitle = newTitle.trim() || "Untitled";
+
+        // Mise à jour optimiste de l'interface
+        setConversations(prev =>
+            prev.map(c => c.id === id ? { ...c, title: trimmedTitle } : c)
+        );
+
+        if (selectedConversation && selectedConversation.id === id) {
+            setSelectedConversation(prev => ({ ...prev, title: trimmedTitle }));
+        }
+
+        // Pour les conversations temporaires, pas d'appel API
         if (id.toString().startsWith("temp")) {
-            setConversations(prev =>
-                prev.map(c =>
-                    c.id === id ? {...c, title: newTitle.trim() || "Untitled"} : c
-                )
-            );
             return;
         }
 
         try {
-            // Optimistic UI update
-            setConversations(prev =>
-                prev.map(c =>
-                    c.id === id ? {...c, title: newTitle.trim() || "Untitled"} : c
-                )
-            );
-
-            // Update selectedConversation if it's the one being renamed
-            if (selectedConversation && selectedConversation.id === id) {
-                setSelectedConversation(prev => ({
-                    ...prev,
-                    title: newTitle.trim() || "Untitled"
-                }));
-            }
-
-            // Send request to backend
-            await updateConversationTitle(id, newTitle.trim() || "Untitled");
-
-            // Refresh conversations list to ensure consistency
+            await updateConversationTitle(id, trimmedTitle);
+            // Actualiser la liste pour assurer la cohérence
             const updatedConversations = await fetchConversations();
             setConversations(updatedConversations);
-
         } catch (error) {
             console.error(`Error renaming conversation ${id}:`, error);
-            // Restore previous state if there was an error
+            // Restaurer l'état précédent en cas d'erreur
             const updatedConversations = await fetchConversations();
             setConversations(updatedConversations);
             throw error;
@@ -155,12 +151,17 @@ export function useChat() {
 
     const deleteConversation = async (id) => {
         try {
-            await deleteConversationApi(id);
+            // Appel API seulement pour les conversations permanentes
+            if (!id.toString().startsWith("temp")) {
+                await deleteConversationApi(id);
+            }
 
+            // Supprimer de la liste
             setConversations(prevConversations =>
                 prevConversations.filter(c => c.id !== id)
             );
 
+            // Si c'était la conversation sélectionnée, la désélectionner
             if (selectedConversation && selectedConversation.id === id) {
                 setSelectedConversation(null);
                 setMessages([]);
@@ -168,7 +169,7 @@ export function useChat() {
 
             return true;
         } catch (error) {
-            console.error(`Error in useChat.deleteConversation:`, error);
+            console.error(`Error deleting conversation ${id}:`, error);
             throw error;
         }
     };
@@ -176,7 +177,6 @@ export function useChat() {
     return {
         conversations,
         selectedConversation,
-        setSelectedConversation,
         selectConversation,
         messages,
         send,

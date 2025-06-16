@@ -23,8 +23,13 @@ function App() {
 
     const sendMessage = async (content) => {
         setError(null);
+
+        if (!selectedConversation) {
+            setError("No conversation selected. Please create or select a conversation.");
+            return;
+        }
+
         try {
-            // Pass the conversation title if it's a new conversation
             const title = selectedConversation?.title || "New conversation";
             await send(content, title, model, temperature);
         } catch (err) {
@@ -32,6 +37,8 @@ function App() {
             setError("Error when calling the server. Please try again.");
         }
     };
+
+    const showChatInterface = selectedConversation || messages.length > 0;
 
     return (
         <div className="flex h-screen bg-white">
@@ -47,7 +54,7 @@ function App() {
             />
 
             <div className="flex-1 flex flex-col">
-                {selectedConversation ? (
+                {showChatInterface ? (
                     <div className="flex flex-col justify-between h-screen max-w-3xl mx-auto px-4 w-full">
                         <ChatWindow messages={messages} />
                         {error && (

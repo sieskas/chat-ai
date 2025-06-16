@@ -1,0 +1,1 @@
+J'aimerais générer un rapport de trafic avec les informations suivantes : - Token : GD3SSKSYL6K8C37EQQFFZA57593L2TGZ - Date de début : 2025-05-01 - Date de fin : 2025-05-31 - Location ID : qwerty - Type de requête : tdd
